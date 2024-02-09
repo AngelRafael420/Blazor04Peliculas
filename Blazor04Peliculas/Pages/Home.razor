@@ -1,0 +1,113 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.JSInterop
+
+<PageTitle>Calculadora de Gastos en Películas</PageTitle>
+
+<link rel="stylesheet" href="css/styles.css" />
+<h1>¿Cuánto Angel Marte gastarás en una pelicula en el cine?</h1>
+
+<br />
+
+<h4>Películas para ver:</h4>
+
+<ul>
+    @foreach (var pelicula in Peliculas)
+    {
+        //mi apartado del boton para selecionar una pelicula
+        <li> 
+            <button @onclick="() => SeleccionarPelicula(pelicula)">@pelicula.Nombre</button>
+        </li>
+    }
+</ul>
+
+<br />
+
+<label>Seleccione su película para ver en CineAngel:</label>
+<br />
+<input type="text" @bind="PeliculaSeleccionada" readonly />
+
+<br />
+
+<label>Mi saldo es disponible:</label>
+<br />
+<input type="number" @bind="DineroDisponible" />
+
+<br />
+
+<!-- Nuevo diseno con css, en el wwwroot agregue el estilo css -->
+<button class="button-styled" @onclick="CalcularGasto">Calcular Gasto</button>
+
+<!-- Esto es útil para manejar de manera limpia los casos en los que GastoCalculado aún
+no tiene un valor o cuando el cálculo no se ha realizado.
+if es una directiva de control de flujo en Blazor que me permite ejecutar bloques 
+de código condicionalmente. En este caso, se está evaluando si la variable GastoCalculado no es null.
+Si la condición es verdadera, el bloque de código dentro del if se ejecutará.
+-->
+
+@if (GastoCalculado != null)
+{
+    <p>@GastoCalculado</p>
+    <p>Saldo Restante: RD$@SaldoRestante</p>
+}
+<!--aqui con este metodo vere cuanto dinero me queda restante y cuanto se gasto-->
+
+
+
+@code {
+    class Pelicula
+    {
+        public string Nombre { get; set; }
+        public decimal Precio { get; set; }
+    }
+
+    List<Pelicula> Peliculas = new List<Pelicula>
+    {
+         // Mi lista de peliculas
+        new Pelicula { Nombre = "Quién Manda", Precio = 1500 },
+        new Pelicula { Nombre = "Biodegradable", Precio = 1200 },
+        new Pelicula { Nombre = "Lotoman", Precio = 1000 },
+        new Pelicula { Nombre = "Carpinteros", Precio = 800 },
+        new Pelicula { Nombre = "Cocote", Precio = 600 },
+        new Pelicula { Nombre = "La pantera rosa", Precio = 400 },
+        new Pelicula { Nombre = "Sanky Panky", Precio = 200 },
+    };
+
+    string PeliculaSeleccionada = string.Empty;
+    decimal DineroDisponible = 0;
+    string GastoCalculado = null;
+    decimal SaldoRestante = 0;
+
+
+    void SeleccionarPelicula(Pelicula pelicula)
+    {
+        PeliculaSeleccionada = pelicula.Nombre;
+    }
+
+    void CalcularGasto()
+    {
+        if (string.IsNullOrEmpty(PeliculaSeleccionada))
+        {
+            GastoCalculado = "Por favor, seleccione una que desea ver película.";
+        }
+        else
+        {
+            var peliculaSeleccionada = Peliculas.FirstOrDefault(p => p.Nombre == PeliculaSeleccionada);
+
+            if (peliculaSeleccionada != null && DineroDisponible >= peliculaSeleccionada.Precio)
+            //con este codigo aqui yo se va busca la película seleccionada en la lista de películas.
+            //y tambien me va a comprobar si la pelicula selecionada existe en la lista asi mismo tambien verificara si el dinero es mayor o igual al precio de la peli que yo selecione
+            {
+                //N2 es para que me muestre los centavos esto lo hice opcional pero se ve mas a mi estilo.
+                SaldoRestante = DineroDisponible - peliculaSeleccionada.Precio;
+                GastoCalculado = $"Gastarás RD${peliculaSeleccionada.Precio:N2} en {PeliculaSeleccionada}. Saldo Restante: RD${SaldoRestante:N2}.";
+                //Nuevo metodo para ver cuanto me resta en mi cuenta.
+            }
+            else
+            {
+                GastoCalculado = "No tienes suficiente dinero para esta película.";
+                //si yo ingreso una cantida de dinero que no tengo este sera el mensaje a mostrar.
+            }
+        }
+    }
+}

@@ -1,0 +1,12 @@
+﻿body {
+    /* Estilos generales para el cuerpo del documento*/
+}
+
+.button-styled {
+    background-color: #3498db;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+
+}
